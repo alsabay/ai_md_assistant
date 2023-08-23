@@ -24,7 +24,7 @@ dataset_lang = 'en'
 model_id = "meta-llama/Llama-2-7b-chat-hf"
 # empty list to save remainder from batches to use in next batch
 remainder = {"input_ids": [], "attention_mask": [], "token_type_ids": []}
-sess = sagemaker.Session()
+# sess = sagemaker.Session()
 
 # fetch tokenizer pad_token
 def fetch_tokenizer(model_id):
@@ -49,10 +49,6 @@ def init_sagemaker(role, session_bucket):
     sess = sagemaker.Session(default_bucket=sagemaker_session_bucket)
     return (sess, role)
 
-    """ print(f"sagemaker role arn: {role}")
-    print(f"sagemaker bucket: {sess.default_bucket()}")
-    print(f"sagemaker session region: {sess.boto_region_name}") """
-
 # load dataset and remove un-used fields
 def load_and_extract(dataset_name, dataset_lang):
     dataset = load_dataset(dataset_name, dataset_lang)
@@ -72,20 +68,10 @@ def format_dialogue(sample):
     prompt = "\n".join([i for i in [instruction, response] if i is not None])
     return '<s>' + prompt + '</s>'
 
-# test formatting
-""" trn_sample = format_dialogue(dataset[randrange(len(dataset))])
-print(trn_sample) """
-
 # template dataset to add prompt to each sample
 def template_dataset(sample):
     sample["text"] = f"{format_dialogue(sample)}{tokenizer.eos_token}"
     return sample
-
-# apply prompt template per sample
-# dataset = dataset.map(template_dataset)
-
-# print random sample
-# print(dataset[randint(0, len(dataset))]["text"])
 
 # chunk and tokenize
 def chunk(sample, chunk_length=2048):
@@ -111,25 +97,6 @@ def chunk(sample, chunk_length=2048):
     # prepare labels
     result["labels"] = result["input_ids"].copy()
     return result
-
-
-# tokenize and chunk dataset
-""" lm_dataset = dataset.map(
-    lambda sample: tokenizer(sample["text"]), batched=True, remove_columns=list(dataset.features)
-).map(
-    partial(chunk, chunk_length=2048),
-    batched=True,
-) """
-
-# Print total number of samples
-#print(f"Total number of samples: {len(lm_dataset)}")
-
-# save train_dataset to s3
-#training_input_path = f's3://{sess.default_bucket()}/processed/llama/md_dialouge/train'
-#lm_dataset.save_to_disk(training_input_path)
-
-""" print("uploaded data to:")
-print(f"training dataset to: {training_input_path}") """
 
 def process_data():
     sm_session, _ = init_sagemaker(role_name, sagemaker_session_bucket)
