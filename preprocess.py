@@ -17,7 +17,7 @@ import json
 import pandas as pd
 from transformers import AutoTokenizer
 
-sagemaker_session_bucket='mlpipes-03-29-2023-asabay'
+sagemaker_session_bucket='mlpipes-sm'
 role_name = 'Sagemaker-mle'
 dataset_name = 'medical_dialog'
 dataset_lang = 'en'
