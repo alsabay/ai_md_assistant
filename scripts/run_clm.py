@@ -1,4 +1,5 @@
 import os
+
 import argparse
 from transformers import (
     AutoModelForCausalLM,
@@ -65,6 +66,12 @@ def parse_arge():
         type=bool,
         default=True,
         help="Whether to merge LoRA weights with base model.",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default=True,
+        help="temp storage for model checkpoint when using spot instances",
     )
     args, _ = parser.parse_known_args()
 
@@ -212,7 +219,7 @@ def training_function(args):
     # Start training
     # trainer.train()
     
-    # check if checkpoint existing if so continue training
+    # check if checkpoint existing if so continue training, this is only for spot instances
     if get_last_checkpoint(args.output_dir) is not None:
         logger.info("***** continue training *****")
         last_checkpoint = get_last_checkpoint(args.output_dir)
