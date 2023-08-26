@@ -27,8 +27,9 @@ base_job_name = "md-assistant-"
 checkpoint_s3_uri = f's3://{sm_sess.default_bucket()}/{base_job_name}/model/checkpoints'
 
 # training machine instance type
-sm_instance_type = 'ml.p4d.24xlarge'
-# sm_instance_type = 'ml.p3.16xlarge'
+sm_instance_type = 'ml.p4d.24xlarge'                # 8 GPU, 320G total gpu mem, A100
+# sm_instance_type = 'ml.p3.16xlarge'               # 8 gpu, 128G total gpu mem, V100
+#sm_instance_type = 'ml.g5.24xlarge'                 # 4 gpu, 96G total gpu mem, A10G
 
 # define Training Job Name 
 job_name = base_job_name + f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}'
