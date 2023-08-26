@@ -21,7 +21,7 @@ sagemaker_session_bucket='mlpipes-sm'
 role_name = 'Sagemaker-mle'
 dataset_name = 'medical_dialog'
 dataset_lang = 'en'
-model_id = "meta-llama/Llama-2-7b-chat-hf"
+model_id = 'meta-llama/Llama-2-13b-chat-hf'
 # empty list to save remainder from batches to use in next batch
 remainder = {"input_ids": [], "attention_mask": [], "token_type_ids": []}
 # sess = sagemaker.Session()
