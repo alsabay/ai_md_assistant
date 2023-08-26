@@ -1,5 +1,6 @@
 import os
-
+import sys
+import logging
 import argparse
 from transformers import (
     AutoModelForCausalLM,
@@ -16,6 +17,11 @@ import torch
 
 import bitsandbytes as bnb
 from huggingface_hub import login, HfFolder
+
+# set up logging function
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 def parse_arge():
