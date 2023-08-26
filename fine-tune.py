@@ -1,3 +1,7 @@
+#############################################################################
+# Fine-tuning script for md-assistant model
+# Adapted from @philschmid hugginface-llama-2-samples
+#############################################################################
 
 import preprocess
 import time
@@ -20,13 +24,15 @@ print(f"sagemaker session region: {sm_sess.boto_region_name}")
 
 # s3 uri where our checkpoints will be uploaded during training
 base_job_name = "md-assistant-"
-checkpoint_s3_uri = f's3://{sm_sess.default_bucket()}/{base_job_name}/checkpoints'
+checkpoint_s3_uri = f's3://{sm_sess.default_bucket()}/{base_job_name}/model/checkpoints'
 
 # training machine instance type
 sm_instance_type = 'ml.p4d.24xlarge'
+# sm_instance_type = 'ml.p3.16xlarge'
 
 # define Training Job Name 
 job_name = base_job_name + f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}'
+sm_output_dir = f'/opt/ml/checkpoints'
 
 # hyperparameters, which are passed into the training job
 hyperparameters ={
@@ -37,19 +43,20 @@ hyperparameters ={
   'lr': 2e-4,                                       # learning rate used during training
   'hf_token': HfFolder.get_token(),                 # huggingface token to access llama 2
   'merge_weights': True,                            # wether to merge LoRA into the model (needs more memory)
+  'output_dir': sm_output_dir                       # checkpoint dir when using spot instances
 }
 
 # create the Estimator
 huggingface_estimator = HuggingFace(
     entry_point          = 'run_clm.py',      # train script
     source_dir           = 'scripts',         # directory which includes all the files needed for training
-    instance_type        = sm_instance_type,   # instances type used for the training job
+    instance_type        = sm_instance_type,  # instances type used for the training job
     instance_count       = 1,                 # the number of instances used for training
     base_job_name        = job_name,          # the name of the training job
     role                 = sm_role,           # Iam role used in training job to access AWS ressources, e.g. S3
     use_spot_instances   = True,              # aws spot instance **kwargs
-    max_wait             = 40000,             # aws spot instance **kwargs
-    max_run              = 36000,             # aws spot instance **kwargs
+    max_wait             = 144000,            # aws spot instance **kwargs in seconds
+    max_run              = 143000,            # aws spot instance **kwargs in seconds
     checkpoint_s3_uri    = checkpoint_s3_uri, # s3 uri where our checkpoints will be uploaded during training
     volume_size          = 300,               # the size of the EBS volume in GB
     transformers_version = '4.28',            # the transformers version used in the training job
