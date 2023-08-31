@@ -1,8 +1,10 @@
 import os
 import sys
+import time
 import logging
 import argparse
 from transformers import (
+    AutoModelForSequenceClassification,
     AutoModelForCausalLM,
     AutoTokenizer,
     set_seed,
@@ -12,17 +14,17 @@ from transformers import (
     TrainingArguments,
 )
 from transformers.trainer_utils import get_last_checkpoint
+from peft import AutoPeftModelForCausalLM
 from datasets import load_from_disk
 import torch
-
 import bitsandbytes as bnb
 from huggingface_hub import login, HfFolder
+import wandb
 
 # set up logging function
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(sys.stdout))
-
 
 def parse_arge():
     """Parse the arguments."""
@@ -79,11 +81,28 @@ def parse_arge():
         default=True,
         help="temp storage for model checkpoint when using spot instances",
     )
+    parser.add_argument(
+        "--wandb_api_key",
+        type=str,
+        default=None,
+        help="api key for wandb platform",
+    )
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        default=None,
+        help="project name for wandb run",
+    )
     args, _ = parser.parse_known_args()
 
     if args.hf_token:
         print(f"Logging into the Hugging Face Hub with token {args.hf_token[:10]}...")
         login(token=args.hf_token)
+
+    # login to wandb instrumentation platform
+    if args.wandb_api_key:
+        print(f'logging in to wandb.....')
+        wandb.login(anonymous='never', key=args.wandb_api_key)
 
     return args
 
@@ -176,6 +195,7 @@ def training_function(args):
     set_seed(args.seed)
 
     dataset = load_from_disk(args.dataset_path)
+
     # load model from the hub with a bnb config
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -199,9 +219,12 @@ def training_function(args):
     )
 
     # Define training args
-    output_dir = "./tmp/llama2"
+    #output_dir = "./tmp/llama2"
+    output_dir = args.output_dir
     training_args = TrainingArguments(
         output_dir=output_dir,
+        resume_from_checkpoint=True,
+        overwrite_output_dir=True,
         per_device_train_batch_size=args.per_device_train_batch_size,
         bf16=args.bf16,  # Use BF16 if available
         learning_rate=args.lr,
@@ -211,7 +234,10 @@ def training_function(args):
         logging_dir=f"{output_dir}/logs",
         logging_strategy="steps",
         logging_steps=10,
-        save_strategy="no",
+        #warmup_steps=100,
+        save_strategy="steps",
+        report_to="wandb",
+        run_name=f'md-asistant-{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}'
     )
 
     # Create Trainer instance
@@ -224,13 +250,14 @@ def training_function(args):
 
     # Start training
     # trainer.train()
-    
     # check if checkpoint existing if so continue training, this is only for spot instances
     if get_last_checkpoint(args.output_dir) is not None:
         logger.info("***** continue training *****")
         last_checkpoint = get_last_checkpoint(args.output_dir)
+        print(f'**********got last checkpoint = {last_checkpoint}**********************')
         trainer.train(resume_from_checkpoint=last_checkpoint)
     else:
+        print('!!!!!!!!!!!!!!INITIAL TRAINING RUN!!!!!!!!!!!!!!!!!!!!')
         trainer.train()
 
     sagemaker_save_dir="/opt/ml/model/"
@@ -242,8 +269,6 @@ def training_function(args):
         del model
         del trainer
         torch.cuda.empty_cache()
-
-        from peft import AutoPeftModelForCausalLM
 
         # load PEFT model in fp16
         model = AutoPeftModelForCausalLM.from_pretrained(
