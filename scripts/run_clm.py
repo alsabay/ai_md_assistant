@@ -219,7 +219,6 @@ def training_function(args):
     )
 
     # Define training args
-    #output_dir = "./tmp/llama2"
     output_dir = args.output_dir
     training_args = TrainingArguments(
         output_dir=output_dir,
@@ -235,7 +234,7 @@ def training_function(args):
         logging_strategy="steps",
         logging_steps=10,
         #warmup_steps=100,
-        save_steps=10,
+        save_steps=50,
         save_strategy="steps",
         report_to="wandb",
         run_name=f'md-asistant-{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}'
