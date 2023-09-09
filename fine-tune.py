@@ -30,11 +30,13 @@ bucket = f's3://{sm_sess.default_bucket()}'
 checkpoint_s3_bucket="s3://{}/{}-/{}".format(sm_sess.default_bucket(), base_job_name, checkpoint_in_bucket)
 
 # training machine instance types, uncomment/enable only 1
-#sm_instance_type = 'ml.p4d.24xlarge'                 # 96 vcpu, 1152G mem, 8 GPU, 320G total gpu mem, A100
-#sm_instance_type = 'ml.p3.16xlarge'                 # 64 vcpu, 488G mem, 8 gpu, 128G total gpu mem, V100
-#sm_instance_type = 'ml.g5.24xlarge'                  # 96 vcpu, 384G mem, 4 gpu, 96G total gpu mem, A10G
-#sm_instance_type = 'ml.g5.12xlarge'                  # 48 vcpu, 192G mem, 4 gpu, 96G total gpu mem, A10G
-sm_instance_type = 'ml.g5.4xlarge'                   # 16 cvpu, 64G mem, 1 gpu, 24G total gpu mem, A10G
+#sm_instance_type = 'ml.p4d.24xlarge'                 # 96 vcpu, 1152G mem, 8 GPU, 320G total gpu mem, A100, 8x1000 vol
+#sm_instance_type = 'ml.p3.16xlarge'                  # 64 vcpu, 488G mem, 8 gpu, 128G total gpu mem, V100, 1x1900G vol
+#sm_instance_type = 'ml.g5.24xlarge'                  # 96 vcpu, 384G mem, 4 gpu, 96G total gpu mem, A10G, 1x3800G vol
+sm_instance_type = 'ml.g5.12xlarge'                  # 48 vcpu, 192G mem, 4 gpu, 96G total gpu mem, A10G, 1x1024G vol
+#sm_instance_type = 'ml.g5.4xlarge'                   # 16 cvpu, 64G mem, 1 gpu, 24G total gpu mem, A10G, 1x600G vol
+
+print(f'+++++++++++++++++++++++++Using aws machine instance type: {sm_instance_type}++++++++++++++++++++++')
 
 # define Training Job Name 
 job_name = base_job_name + f'-{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}'
@@ -45,7 +47,7 @@ wandb_api_key = os.getenv('WB_API_KEY')
 hyperparameters ={
   'model_id': model_id,                             # pre-trained model
   'dataset_path': '/opt/ml/input/data/training',    # path where sagemaker will save training dataset
-  'epochs': 3,                                      # number of training epochs
+  'epochs': 2,                                      # number of training epochs
   'per_device_train_batch_size': 2,                 # batch size for training
   'lr': 2e-4,                                       # learning rate used during training
   'hf_token': HfFolder.get_token(),                 # huggingface token to access llama 2
@@ -64,12 +66,12 @@ huggingface_estimator = HuggingFace(
     instance_count       = 1,                       # the number of instances used for training
     base_job_name        = job_name,                # the name of the training job
     role                 = sm_role,                 # Iam role used in training job to access AWS ressources, e.g. S3
-    use_spot_instances   = True,                    # aws spot instance **kwargs
-    max_wait             = 144000,                  # aws spot instance **kwargs in seconds
-    max_run              = 143000,                  # aws spot instance **kwargs in seconds
+    use_spot_instances   = False,                    # aws spot instance **kwargs
+    #max_wait             = 144000,                  # aws spot instance **kwargs in seconds
+    #max_run              = 143000,                  # aws spot instance **kwargs in seconds
     checkpoint_s3_uri    = checkpoint_s3_bucket,    # s3 uri where our checkpoints will be uploaded during training
     checkpoint_local_path= sm_output_dir,           # algorithm writes checkpoints to this local path then up to s3
-    volume_size          = 300,                     # the size of the EBS volume in GB
+    volume_size          = 800,                     # the size of the EBS volume in GB
     transformers_version = '4.28',                  # the transformers version used in the training job
     pytorch_version      = '2.0',                   # the pytorch_version version used in the training job
     py_version           = 'py310',                 # the python version used in the training job
