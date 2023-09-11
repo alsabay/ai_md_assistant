@@ -15,13 +15,13 @@ HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 
 # Model and Endpoint configuration
 config = {
-  'HF_MODEL_ID': "meta-llama/Llama-2-7b-chat-hf", # model_id from hf.co/models
-  'SM_NUM_GPUS': json.dumps(number_of_gpu), # Number of GPU used per replica
-  'MAX_INPUT_LENGTH': json.dumps(2048),  # Max length of input text
-  'MAX_TOTAL_TOKENS': json.dumps(4096),  # Max length of the generation (including input text)
-  'MAX_BATCH_TOTAL_TOKENS': json.dumps(8192),  # Limits the number of tokens that can be processed in parallel during the generation
-  'HUGGING_FACE_HUB_TOKEN': os.getenv('HF_API_TOKEN')
-  # ,'HF_MODEL_QUANTIZE': "bitsandbytes", # comment in to quantize
+  'HF_MODEL_ID': "meta-llama/Llama-2-7b-chat-hf",           # model_id from hf.co/models
+  'SM_NUM_GPUS': json.dumps(number_of_gpu),                 # Number of GPU used per replica
+  'MAX_INPUT_LENGTH': json.dumps(2048),                     # Max length of input text
+  'MAX_TOTAL_TOKENS': json.dumps(4096),                     # Max length of the generation (including input text)
+  'MAX_BATCH_TOTAL_TOKENS': json.dumps(8192),               # Limits the number of tokens that can be processed in parallel during the generation
+  'HUGGING_FACE_HUB_TOKEN': os.getenv('HF_API_TOKEN'),
+  # ,'HF_MODEL_QUANTIZE': "bitsandbytes",                   # comment in to quantize
 }
 
 # check if token is set
