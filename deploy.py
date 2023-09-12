@@ -46,7 +46,7 @@ predictor = huggingface_model.deploy(
 
 # test here
 
-# delete endpoint
+""" # delete endpoint
 print('deleting endpoint... test done')
 huggingface_model.delete_model()
-predictor.delete_endpoint()
+predictor.delete_endpoint() """
