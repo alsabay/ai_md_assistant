@@ -14,5 +14,5 @@ Developing conversational AI systems that can facilitate patient-doctor interact
 
 Actual fine-tuning projects that involve any medical/clinical data would have to be anonymized in compliance HIPAA.
 
-For a detailed walkthrough, subscribe to [nexusnotes](https://nexusnotes.com) and find the blog about this codebase.
+For a detailed walkthrough, subscribe to [nexusnotes](https://www.nexusnotes.blog) and find the blog about this codebase.
 
