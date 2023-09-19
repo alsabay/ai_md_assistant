@@ -1,5 +1,5 @@
 ## LLAMA 2 Finetuned as MD Assistant Agent with Streamlit Chatbot UI
-Customizing a LLAMA 2 13B Chat model to assist Doctors in clinical scenarios.
+### Customizing a LLAMA 2 13B Chat model to assist Doctors in clinical scenarios. ###
 
 *Important:* This conversational AI model is not intended to provide medical advice or diagnose medical conditions. It is solely designed to assist with generating hypothetical patient scenarios for educational purposes. Any information provided by this model should not be considered medical advice or substitute for professional medical judgment. If you have any health concerns or symptoms, we strongly encourage you to seek advice from a qualified healthcare professional. Only licensed physicians and medical professionals are trained and authorized to provide medical advice and treatment. Use of this model does not establish a doctor-patient relationship. We disclaim any warranty or liability for damages resulting from the use of this model, including but not limited to direct, indirect, incidental, punitive, and consequential damages.
 
